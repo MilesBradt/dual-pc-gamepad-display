@@ -1,48 +1,176 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Socket.IO chat</title>
-    <style>
-      body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
 
-      #form { background: rgba(0, 0, 0, 0.15); padding: 0.25rem; position: fixed; bottom: 0; left: 0; right: 0; display: flex; height: 3rem; box-sizing: border-box; backdrop-filter: blur(10px); }
-      #input { border: none; padding: 0 1rem; flex-grow: 1; border-radius: 2rem; margin: 0.25rem; }
-      #input:focus { outline: none; }
-      #form > button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+<head>
+  <meta charset="utf-8">
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    var socket = io();
+    var item = document.createElement('li');
 
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages > li { padding: 0.5rem 1rem; }
-      #messages > li:nth-child(odd) { background: #efefef; }
-    </style>
-  </head>
-  <body>
-    <ul id="messages"></ul>
-    <form id="form" action="">
-      <input id="input" autocomplete="off" /><button>Send</button>
-    </form>
-    <script src="/socket.io/socket.io.js"></script>
+    var haveEvents = 'GamepadEvent' in window;
+    var haveWebkitEvents = 'WebKitGamepadEvent' in window;
+    var controllers = {};
+    var rAF = window.mozRequestAnimationFrame ||
+      window.webkitRequestAnimationFrame ||
+      window.requestAnimationFrame;
+    var d = document.createElement("div");
 
-    <script>
-      var socket = io();
+    function connecthandler(e) {
+      addgamepad(e.gamepad);
+      console.log(e.gamepad)
+    }
 
-      var messages = document.getElementById('messages');
-      var form = document.getElementById('form');
-      var input = document.getElementById('input');
+    function addgamepad(gamepad) {
+      controllers[gamepad.index] = gamepad;
+      socket.emit('gamepad type', gamepad.id);
+      rAF(updateStatus);
+    }
 
-      form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        if (input.value) {
-          socket.emit('chat message', input.value);
-          input.value = '';
+    function disconnecthandler(e) {
+      removegamepad(e.gamepad);
+    }
+
+    function removegamepad(gamepad) {
+      var d = document.getElementById("controller" + gamepad.index);
+      document.body.removeChild(d);
+      delete controllers[gamepad.index];
+    }
+
+    function updateStatus() {
+      scangamepads();
+      const array = []
+      for (j in controllers) {
+        const controllerInfo = controllers[j].buttons
+        for (i = 0; i < controllerInfo.length; i++) {
+          array.push({
+            id: i,
+            pressed: controllerInfo[i].pressed,
+            value: controllerInfo[i].value
+          })
         }
-      });
+        socket.emit('buttons pushed', array)
+      }
+    }
 
-      socket.on('chat message', function(msg) {
-        var item = document.createElement('li');
-        item.textContent = msg;
-        messages.appendChild(item);
-        window.scrollTo(0, document.body.scrollHeight);
-      });
-    </script>
-  </body>
+    function scangamepads() {
+      var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads() : []);
+      for (var i = 0; i < gamepads.length; i++) {
+        if (gamepads[i] && (gamepads[i].index in controllers)) {
+          controllers[gamepads[i].index] = gamepads[i];
+        }
+      }
+    }
+
+    if (haveEvents) {
+      window.addEventListener("gamepadconnected", connecthandler);
+      window.addEventListener("gamepaddisconnected", disconnecthandler);
+    } else if (haveWebkitEvents) {
+      window.addEventListener("webkitgamepadconnected", connecthandler);
+      window.addEventListener("webkitgamepaddisconnected", disconnecthandler);
+    } else {
+      setInterval(scangamepads, 500);
+    }
+
+    socket.on('buttons pushed', (btn) => {
+      var d = document.getElementById("controller");
+      var buttons = d.getElementsByClassName("button");
+      btn.forEach(e => {
+        var b = buttons[e.id];
+        var val = e.value;
+        var pressed = val == 1.0;
+        var touched = false;
+        if (typeof (val) == "object") {
+          pressed = val.pressed;
+          if ('touched' in val) {
+            touched = val.touched;
+          }
+          val = val.value;
+        }
+        var pct = Math.round(val * 100) + "%";
+        b.style.backgroundSize = pct + " " + pct;
+        b.className = "button";
+        if (pressed) {
+          b.className += " pressed";
+        }
+        if (touched) {
+          b.className += " touched";
+        }
+      })
+      rAF(updateStatus);
+    })
+
+    socket.on('gamepad type', (id) => {
+      console.log("it got here: " + id)
+      d.append(id)
+    });
+  </script>
+  <style>
+    .axes {
+      padding: 1em;
+    }
+
+    .buttons {
+      margin-left: 1em;
+    }
+
+    /*meter*/
+    .axis {
+      min-width: 200px;
+      margin: 1em;
+    }
+
+    .button {
+      display: inline-block;
+      width: 1em;
+      text-align: center;
+      padding: 1em;
+      border-radius: 20px;
+      border: 1px solid black;
+      background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAAAXNSR0IArs4c6QAAAAxJREFUCNdjYPjPAAACAgEAqiqeJwAAAABJRU5ErkJggg==);
+      background-size: 0% 0%;
+      background-position: 50% 50%;
+      background-repeat: no-repeat;
+    }
+
+    .pressed {
+      border: 1px solid red;
+    }
+
+    .touched::after {
+      content: "touch";
+      display: block;
+      position: absolute;
+      margin-top: -0.2em;
+      margin-left: -0.5em;
+      font-size: 0.8em;
+      opacity: 0.7;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="controller">
+    <div class="buttons">
+      <span class="button">0</span>
+      <span class="button">1</span>
+      <span class="button">2</span>
+      <span class="button">3</span>
+      <span class="button">4</span>
+      <span class="button">5</span>
+      <span class="button">6</span>
+      <span class="button">7</span>
+      <span class="button">8</span>
+      <span class="button">9</span>
+      <span class="button">10</span>
+      <span class="button">11</span>
+      <span class="button">12</span>
+      <span class="button">13</span>
+      <span class="button">14</span>
+      <span class="button">15</span>
+      <span class="button">16</span>
+    </div>
+  </div>
+</body>
+
 </html>
