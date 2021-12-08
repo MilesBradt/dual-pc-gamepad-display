@@ -1,9 +1,9 @@
-body {
-    background: url(../images/ps4controller.jpg);
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-position: 50% 50%;
-  }
+img {
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  width: 100%;
+}
 
   .axes {
     padding: 1em;
@@ -12,6 +12,12 @@ body {
   .buttons {
     margin-left: 1em;
   }
+
+  /* #x {
+    position: absolute;
+    top: 0%;
+    width: 100%;
+  } */
 
   /*meter*/
   .axis {
