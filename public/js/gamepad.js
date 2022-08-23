@@ -32,9 +32,15 @@ var socket = io();
 
     function updateStatus() {
       scangamepads();
-      const array = []
+      const controller = [];
+      const array = [];
+      const leftStickArray = [];
+      const rightStickArray = [];
+
       for (j in controllers) {
         const controllerInfo = controllers[j].buttons
+        const controllerStickInfo = controllers[j].axes
+        
         for (i = 0; i < controllerInfo.length; i++) {
           array.push({
             id: i,
@@ -42,7 +48,35 @@ var socket = io();
             value: controllerInfo[i].value
           })
         }
-        socket.emit('buttons pushed', array)
+
+        // 0 = l x-axis
+        // 1 = l y-axis
+        // 2 = r x-axis
+        // 3 = r y-axis
+
+        leftStickArray.push({
+          xaxis: controllerStickInfo[0],
+          yaxis: controllerStickInfo[1]
+        })
+
+        rightStickArray.push({
+          xaxis: controllerStickInfo[2],
+          yaxis: controllerStickInfo[3] 
+        })
+
+        // console.log("left x-axis: " + leftStickArray[0].xaxis)
+        // console.log("left y-axis: " + leftStickArray[0].yaxis)
+
+        // console.log("right x-axis: " + rightStickArray[0].xaxis)
+        // console.log("right y-axis: " + rightStickArray[0].yaxis)
+
+        controller.push({
+          buttons: array,
+          left: leftStickArray,
+          right: rightStickArray
+        })
+
+        socket.emit('buttons pushed', controller)
       }
     }
 
@@ -65,10 +99,10 @@ var socket = io();
       setInterval(scangamepads, 500);
     }
 
-    socket.on('buttons pushed', (btn) => {
+    socket.on('buttons pushed', (controller) => {
       var d = document.getElementById("controller");
       var buttons = d.getElementsByClassName("button");
-      btn.forEach(e => {
+      controller[0].buttons.forEach(e => {
         var b = buttons[e.id];
         var val = e.value;
         var pressed = val == 1.0;
@@ -82,14 +116,20 @@ var socket = io();
         }
         var pct = Math.round(val * 100) + "%";
         b.style.backgroundSize = pct + " " + pct;
+        b.style.display = "none"
         b.className = "button";
         if (pressed) {
           b.className += " pressed";
+          b.style.display = "block"
         }
         if (touched) {
           b.className += " touched";
         }
       })
+
+      console.log(controller[0].left[0])
+      console.log(controller[0].right[0])
+
       rAF(updateStatus);
     })
 

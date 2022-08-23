@@ -19,6 +19,7 @@ io.on('connection', (socket) => {
     socket.on('buttons pushed', (controller) => {
         io.emit('buttons pushed', controller)
     })
+    
 });
 
 http.listen(port, () => {
