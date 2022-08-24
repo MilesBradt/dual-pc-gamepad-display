@@ -21,12 +21,6 @@ img {
     margin-left: 1em;
   }
 
-  /* #x {
-    position: absolute;
-    top: 0%;
-    width: 100%;
-  } */
-
   /*meter*/
   .axis {
     min-width: 200px;
@@ -36,6 +30,11 @@ img {
   #shoulder {
     position: absolute;
     z-index: -1;
+  }
+
+  #trigger {
+    position: absolute;
+    z-index: -2;
   }
 
   /* .button {

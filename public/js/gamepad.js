@@ -120,12 +120,18 @@ socket.on('buttons pushed', (controller) => {
     }
     var pct = Math.round(val * 100) + "%";
     // b.style.backgroundSize = pct + " " + pct;
-
-    console.log(e.id)
-    if (e.id == 4 || e.id == 5) {
+    if (e.id == 6 || e.id == 7) {
+      console.log(e.value)
       b.style.display = "block"
       b.className = "button";
-      if(pressed) {
+      b.style.objectPosition = "0em " + e.value + "em"
+      if (pressed) {
+        b.className += " pressed";
+      }
+    } else if (e.id == 4 || e.id == 5) {
+      b.style.display = "block"
+      b.className = "button";
+      if (pressed) {
         b.className += " pressed";
         b.style.objectPosition = "0em 0.30em"
       } else {
