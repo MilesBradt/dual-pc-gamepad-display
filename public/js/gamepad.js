@@ -102,6 +102,16 @@ var socket = io();
     socket.on('buttons pushed', (controller) => {
       var d = document.getElementById("controller");
       var buttons = d.getElementsByClassName("button");
+      var sticks = d.getElementsByClassName("stick");
+      var leftStick = sticks[0];
+      var rightStick = sticks[1];
+
+      const leftStickXAxis = controller[0].left[0].xaxis
+      const leftStickYAxis = controller[0].left[0].yaxis
+      
+      const rightStickXAxis = controller[0].right[0].xaxis
+      const rightStickYAxis = controller[0].right[0].yaxis
+
       controller[0].buttons.forEach(e => {
         var b = buttons[e.id];
         var val = e.value;
@@ -127,8 +137,9 @@ var socket = io();
         }
       })
 
-      console.log(controller[0].left[0])
-      console.log(controller[0].right[0])
+      leftStick.style.objectPosition = (leftStickXAxis.toFixed(3) * 0.5) + "cm" + " " + (leftStickYAxis.toFixed(3) * 0.5) + "cm";
+
+      rightStick.style.objectPosition = (rightStickXAxis.toFixed(3) * 0.5) + "cm" + " " + (rightStickYAxis.toFixed(3) * 0.5) + "cm";
 
       rAF(updateStatus);
     })
