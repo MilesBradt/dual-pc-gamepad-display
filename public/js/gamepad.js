@@ -108,6 +108,7 @@ socket.on('buttons pushed', (controller) => {
   controller[0].buttons.forEach(e => {
     var b = buttons[e.id];
     var val = e.value;
+    var valRound = val.toFixed(3);
     var pressed = val == 1.0;
     var touched = false;
     if (typeof (val) == "object") {
@@ -121,7 +122,7 @@ socket.on('buttons pushed', (controller) => {
     if (e.id == 6 || e.id == 7) {
       b.style.display = "block"
       b.className = "button";
-      b.style.objectPosition = "0em " + e.value + "em"
+      b.style.objectPosition = "0em " + valRound + "em"
       if (pressed) {
         b.className += " pressed";
       }
