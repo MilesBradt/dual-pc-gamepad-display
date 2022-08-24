@@ -1,9 +1,17 @@
+html {
+  position: relative;
+  width: 500px;
+  height: 313px;
+  height: 100%;
+}
+
 img {
   position: absolute;
   top: 0%;
   left: 0%;
   width: 100%;
 }
+
 
   .axes {
     padding: 1em;
@@ -25,7 +33,12 @@ img {
     margin: 1em;
   }
 
-  .button {
+  #shoulder {
+    position: absolute;
+    z-index: -1;
+  }
+
+  /* .button {
     display: inline-block;
     width: 1em;
     text-align: center;
@@ -36,7 +49,7 @@ img {
     background-size: 0% 0%;
     background-position: 50% 50%;
     background-repeat: no-repeat;
-  }
+  } */
 
   .pressed {
     border: 1px solid red;
