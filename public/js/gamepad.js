@@ -11,7 +11,6 @@ var d = document.createElement("div");
 
 function connecthandler(e) {
   addgamepad(e.gamepad);
-  console.log(e.gamepad)
 }
 
 function addgamepad(gamepad) {
@@ -119,9 +118,7 @@ socket.on('buttons pushed', (controller) => {
       val = val.value;
     }
     var pct = Math.round(val * 100) + "%";
-    // b.style.backgroundSize = pct + " " + pct;
     if (e.id == 6 || e.id == 7) {
-      console.log(e.value)
       b.style.display = "block"
       b.className = "button";
       b.style.objectPosition = "0em " + e.value + "em"
@@ -158,6 +155,5 @@ socket.on('buttons pushed', (controller) => {
 })
 
 socket.on('gamepad type', (id) => {
-  console.log("it got here: " + id)
   d.append(id)
 });
